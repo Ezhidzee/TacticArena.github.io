@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TacticArena — офлайн-соревнования по шахматным задачам</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #333333;
+      --muted: #585958;
+      --green: #2C6A4E;
+      --green-dark: #174131;
+      --green-soft: #DDEEE4;
+      --green-light: #EEF7F1;
+      --paper: #ffffff;
+      --line: #E4E5E3;
+      --panel: #EFF0F1;
+      --blue: #A2C6F9;
+      --aqua: #B0E1E5;
+      --violet: #B5B1EF;
+      --gray: #898989;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; }
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Onest", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+
+    .slide {
+      display: none;
+      min-height: 100vh;
+      padding: 8.2vh 9vw 13vh;
+      align-items: stretch;
+      justify-content: center;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .slide.active { display: flex; }
+    .slide.active > * { animation: rise .52s cubic-bezier(.2,.8,.2,1) both; }
+    .slide.active > *:nth-child(2) { animation-delay: .08s; }
+    .slide.active > *:nth-child(3) { animation-delay: .16s; }
+    .slide.active > *:nth-child(4) { animation-delay: .24s; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .kicker {
+      color: var(--muted);
+      font-size: clamp(12px, 1.25vw, 17px);
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 18px;
+    }
+    .kicker::before { content: ""; width: 32px; height: 5px; background: var(--green); }
+    h1, h2, p { margin: 0; }
+    h1 {
+      font-size: clamp(56px, 7.2vw, 116px);
+      line-height: .98;
+      max-width: 1020px;
+      letter-spacing: -.055em;
+    }
+    h2 {
+      font-size: clamp(39px, 4.4vw, 68px);
+      line-height: 1.03;
+      letter-spacing: -.045em;
+      max-width: 1050px;
+    }
+    .marker { background: var(--green-soft); color: var(--green-dark); padding: 0 .15em; }
+    .lead {
+      color: var(--muted);
+      font-size: clamp(20px, 2.1vw, 31px);
+      line-height: 1.36;
+      max-width: 850px;
+      margin-top: 30px;
+    }
+    .smallnote { color: var(--muted); font-size: clamp(13px, 1.1vw, 16px); line-height: 1.4; }
+
+    .cover { justify-content: center; }
+    .cover .lead { max-width: 665px; }
+    .cover-art {
+      position: absolute;
+      right: 8vw;
+      top: 11vh;
+      width: min(33vw, 440px);
+      height: min(33vw, 440px);
+      border-radius: 50%;
+      background: var(--green);
+      display: grid;
+      place-items: center;
+      box-shadow: 22px 24px 0 var(--panel);
+    }
+    .knight { font-family: Georgia, serif; font-size: min(27vw, 330px); line-height: .75; color: var(--ink); transform: translateY(-3%); }
+    .chess-grid {
+      position: absolute;
+      width: min(30vw, 350px);
+      height: min(30vw, 350px);
+      right: 5vw;
+      bottom: -9vw;
+      opacity: .28;
+      background-color: var(--green-soft);
+      background-image: conic-gradient(from 90deg, rgba(44,106,78,.26) 25%, transparent 0 50%, rgba(44,106,78,.26) 0 75%, transparent 0);
+      background-size: 25% 25%;
+      transform: rotate(8deg);
+      pointer-events: none;
+    }
+
+    .problem-layout { display: grid; grid-template-columns: 1.08fr .92fr; align-items: end; gap: 7vw; margin-top: 3vh; }
+    .statement { font-size: clamp(25px, 2.6vw, 40px); line-height: 1.16; letter-spacing: -.035em; }
+    .pain-list { border-left: 3px solid var(--green); padding-left: 24px; display: grid; gap: 19px; }
+    .pain-list p { color: var(--muted); font-size: clamp(17px, 1.65vw, 23px); line-height: 1.3; }
+
+    .audience { margin-top: 48px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 7vw; max-width: 1050px; }
+    .audience-item { padding-top: 19px; border-top: 2px solid var(--ink); }
+    .audience-item:nth-child(2) { border-color: var(--green); }
+    .audience-item h3 { margin: 0 0 9px; font-size: clamp(22px, 2vw, 30px); letter-spacing: -.03em; }
+    .audience-item p { color: var(--muted); font-size: clamp(16px, 1.45vw, 20px); line-height: 1.35; }
+
+    .flow { margin-top: 48px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; max-width: 1240px; }
+    .step { min-height: 235px; padding: 23px; display: flex; flex-direction: column; justify-content: space-between; background: var(--panel); }
+    .step:nth-child(1) { background: var(--green-soft); }
+    .step:nth-child(3) { background: #E8F4EB; }
+    .step .num { font-size: 18px; font-weight: 700; }
+    .step p { font-size: clamp(18px, 1.7vw, 25px); line-height: 1.15; letter-spacing: -.025em; }
+    .offline-proof { margin-top: 22px; color: var(--muted); font-size: clamp(16px, 1.45vw, 21px); }
+
+    .modes { margin-top: 43px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; max-width: 1090px; background: var(--line); }
+    .mode { background: var(--paper); min-height: 178px; padding: 24px 27px; }
+    .mode:nth-child(1) { background: #E8F4EB; }
+    .mode:nth-child(2) { background: #F2F6FD; }
+    .mode:nth-child(3) { background: #EEF9FA; }
+    .mode:nth-child(4) { background: #F2F0FC; }
+    .mode strong { display: block; font-size: clamp(23px, 2.1vw, 32px); letter-spacing: -.035em; margin-bottom: 10px; }
+    .mode p { color: var(--muted); font-size: clamp(16px, 1.4vw, 20px); line-height: 1.32; }
+
+    .compare { margin-top: 43px; max-width: 1120px; display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--ink); }
+    .compare > div { padding: 22px 25px 10px 0; }
+    .compare > div:last-child { padding-left: 30px; border-left: 5px solid var(--green); }
+    .compare h3 { font-size: clamp(21px, 1.85vw, 28px); margin: 0 0 18px; letter-spacing: -.03em; }
+    .compare p { color: var(--muted); font-size: clamp(17px, 1.48vw, 21px); line-height: 1.48; max-width: 420px; }
+    .compare p + p { margin-top: 10px; }
+
+    .value-layout { margin-top: 40px; display: grid; grid-template-columns: 1.07fr .93fr; gap: 7vw; max-width: 1180px; align-items: start; }
+    .value-list { display: grid; gap: 16px; }
+    .value-list p { border-left: 5px solid var(--green); padding: 7px 0 7px 17px; font-size: clamp(20px, 1.83vw, 27px); line-height: 1.18; }
+    .business { background: var(--panel); padding: 28px; }
+    .business h3 { font-size: clamp(22px, 2vw, 30px); letter-spacing: -.035em; margin: 0 0 18px; }
+    .business p { color: var(--muted); font-size: clamp(16px, 1.45vw, 20px); line-height: 1.42; }
+    .ask { margin-top: 35px; padding-top: 23px; border-top: 2px solid var(--ink); font-size: clamp(24px, 2.4vw, 36px); line-height: 1.14; letter-spacing: -.035em; max-width: 1050px; }
+
+    .nav {
+      position: fixed;
+      z-index: 5;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: .04em;
+    }
+    .nav button {
+      appearance: none;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+      background: var(--paper);
+      color: var(--ink);
+      font: inherit;
+      font-size: 22px;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease;
+    }
+    .nav button:hover { background: var(--green-soft); transform: translateY(-2px); }
+    .nav button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+    @media (max-width: 760px) {
+      .slide { padding: 7vh 7vw 15vh; }
+      .cover-art { opacity: .16; right: -7vw; top: 10vh; width: 64vw; height: 64vw; }
+      .problem-layout, .value-layout { grid-template-columns: 1fr; gap: 28px; }
+      .flow { grid-template-columns: 1fr 1fr; }
+      .step { min-height: 150px; }
+      .compare { grid-template-columns: 1fr; }
+      .compare > div:last-child { padding-left: 0; border-left: 0; border-top: 5px solid var(--green); padding-top: 20px; }
+      .audience { gap: 16px 30px; }
+      .modes { margin-top: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <section class="slide cover">
+    <div class="chess-grid" aria-hidden="true"></div>
+    <div class="cover-art" aria-hidden="true"><div class="knight">♞</div></div>
+    <h1>Tactic<span class="marker">Arena</span></h1>
+    <p class="lead">Офлайн-соревнования по шахматным задачам для клубов, школ и мероприятий</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Проблема</p>
+    <h2>Шахматные задачи доступны <span class="marker">онлайн</span>, но игра рядом с друзьями от него зависит</h2>
+    <div class="problem-layout">
+      <p class="statement">В поезде, лагере, на выездном занятии или в аудитории с плохим Wi‑Fi трудно быстро устроить общее соревнование.</p>
+      <div class="pain-list">
+        <p>Глобальные сервисы требуют стабильного доступа к сети и внешнему сервису.</p>
+        <p>У части игроков нет аккаунта или подходящего доступа к платформе.</p>
+        <p>Тренеру приходится возвращаться к таймерам и ручному подсчёту.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Решение</p>
+    <h2>Один телефон собирает <span class="marker">локальную арену</span> за несколько минут</h2>
+    <div class="flow">
+      <div class="step"><span class="num">01</span><p>Ведущий создаёт комнату на телефоне или планшете</p></div>
+      <div class="step"><span class="num">02</span><p>Игроки сканируют QR-код и подключаются</p></div>
+      <div class="step"><span class="num">03</span><p>Все получают одинаковую последовательность задач</p></div>
+      <div class="step"><span class="num">04</span><p>Приложение считает решения, ошибки и время</p></div>
+    </div>
+    <p class="offline-proof">Связь работает по Bluetooth или локальному Wi‑Fi. Задачи хранятся в приложении или у ведущего, поэтому внешний интернет не нужен.</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Первые пользователи</p>
+    <h2>Первые клиенты уже собирают игроков <span class="marker">в одном месте</span></h2>
+    <div class="audience">
+      <div class="audience-item"><h3>Шахматные школы</h3><p>Проводят короткие соревновательные тренировки для групп учеников.</p></div>
+      <div class="audience-item"><h3>Тренеры и клубы</h3><p>Нуждаются в готовом формировании раундов и прозрачном подсчёте результата.</p></div>
+      <div class="audience-item"><h3>Лагеря и выезды</h3><p>Работают в условиях нестабильного интернета и без обязательных аккаунтов.</p></div>
+      <div class="audience-item"><h3>Университеты</h3><p>Ищут быстрый формат для клубных встреч и тематических мероприятий.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Игровые режимы</p>
+    <h2>Четыре формата поддерживают и <span class="marker">азарт</span>, и командную работу</h2>
+    <div class="modes">
+      <div class="mode"><strong>Sprint</strong><p>Кто решит больше задач за 90 секунд или 3 минуты.</p></div>
+      <div class="mode"><strong>Survival</strong><p>Игрок решает задачи, пока не допустит три ошибки.</p></div>
+      <div class="mode"><strong>Duel</strong><p>Два игрока проходят одну последовательность задач.</p></div>
+      <div class="mode"><strong>Relay</strong><p>Команда передаёт эстафету: следующий игрок получает задачу после решения предыдущей.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Аналоги</p>
+    <h2>Онлайн-сервисы решают задачи на расстоянии, мы собираем <span class="marker">игроков рядом</span></h2>
+    <div class="compare">
+      <div>
+        <h3>Chess.com и Lichess</h3>
+        <p>Веб-сайт Chess.com заблокирован в России, а его режимы работают через внешний онлайн-сервис.</p>
+        <p>У Lichess есть Puzzle Racer, но нет локального офлайн-формата с ведущим и командной эстафетой.</p>
+      </div>
+      <div>
+        <h3>TacticArena</h3>
+        <p>Работает в одной аудитории без внешнего интернета и обязательных аккаунтов.</p>
+        <p>Добавляет ведущего, общий старт, локальное табло и режим Relay.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Ценность для клиента</p>
+    <h2>Тренер проводит соревновательное занятие <span class="marker">без ручной рутины</span></h2>
+    <div class="value-layout">
+      <div class="value-list">
+        <p>Игроки получают быстрый соревновательный формат и рейтинг внутри клуба.</p>
+        <p>Ведущий запускает раунд и видит результаты без таблиц и секундомеров.</p>
+        <p>Клуб использует тематические задания для регулярных тренировок.</p>
+      </div>
+      <div class="business">
+        <h3>Модель дохода</h3>
+        <p>Базовые локальные игры доступны бесплатно. Подписка Pro для тренера или клуба открывает большие комнаты, собственные наборы задач, историю раундов, аналитику ошибок и экспорт результатов.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Запрос на проект</p>
+    <h2>Запрашиваем <span class="marker">минимум 400 баллов</span> на реализацию TacticArena</h2>
+    <p class="lead">Эта оценка покрывает мобильный клиент, локальное взаимодействие между устройствами, игровую логику четырёх режимов и офлайн-каталог задач.</p>
+    <p class="ask">Следующий шаг: проверить MVP на первой живой группе в шахматном клубе или университете.</p>
+  </section>
+
+  <div class="nav"><button id="prev">←</button><span id="cnt">1 / 1</span><button id="next">→</button></div>
+  <script> const slides=[...document.querySelectorAll('.slide')];let i=0; function go(n){i=Math.max(0,Math.min(slides.length-1,n)); slides.forEach((s,k)=>s.classList.toggle('active',k===i)); document.getElementById('cnt').textContent=(i+1)+' / '+slides.length;} document.getElementById('prev').onclick=()=>go(i-1); document.getElementById('next').onclick=()=>go(i+1); document.addEventListener('keydown',e=>{if(e.code==='ArrowRight'||e.code==='Space')go(i+1);else if(e.code==='ArrowLeft')go(i-1);}); go(0); </script>
+</body>
+</html>
