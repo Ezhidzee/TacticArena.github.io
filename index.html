@@ -160,6 +160,9 @@
     .business p { color: var(--muted); font-size: clamp(16px, 1.45vw, 20px); line-height: 1.42; }
     .ask { margin-top: 35px; padding-top: 23px; border-top: 2px solid var(--ink); font-size: clamp(24px, 2.4vw, 36px); line-height: 1.14; letter-spacing: -.035em; max-width: 1050px; }
 
+    .meme-slide { padding: 0; background: #000; align-items: center; }
+    .meme-slide img { width: 100%; height: 100vh; object-fit: contain; display: block; }
+
     .nav {
       position: fixed;
       z-index: 5;
@@ -213,7 +216,7 @@
 
   <section class="slide">
     <p class="kicker">Проблема</p>
-    <h2>Шахматные задачи доступны <span class="marker">онлайн</span>, но игра рядом с друзьями от него зависит</h2>
+    <h2>Для соревнований по шахматным задачам обычно нужен <span class="marker">интернет</span></h2>
     <div class="problem-layout">
       <p class="statement">В поезде, лагере, на выездном занятии или в аудитории с плохим Wi‑Fi трудно быстро устроить общее соревнование.</p>
       <div class="pain-list">
@@ -226,7 +229,7 @@
 
   <section class="slide">
     <p class="kicker">Решение</p>
-    <h2>Один телефон собирает <span class="marker">локальную арену</span> за несколько минут</h2>
+    <h2>Один телефон создаёт игру <span class="marker">для всей группы</span></h2>
     <div class="flow">
       <div class="step"><span class="num">01</span><p>Ведущий создаёт комнату на телефоне или планшете</p></div>
       <div class="step"><span class="num">02</span><p>Игроки сканируют QR-код и подключаются</p></div>
@@ -296,6 +299,10 @@
     <h2>Запрашиваем <span class="marker">минимум 400 баллов</span> на реализацию TacticArena</h2>
     <p class="lead">Эта оценка покрывает мобильный клиент, локальное взаимодействие между устройствами, игровую логику четырёх режимов и офлайн-каталог задач.</p>
     <p class="ask">Следующий шаг: проверить MVP на первой живой группе в шахматном клубе или университете.</p>
+  </section>
+
+  <section class="slide meme-slide">
+    <img src="final-meme.png" alt="Мем про свидание, шахматы и постоянные ошибки">
   </section>
 
   <div class="nav"><button id="prev">←</button><span id="cnt">1 / 1</span><button id="next">→</button></div>
